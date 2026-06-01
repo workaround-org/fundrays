@@ -61,6 +61,19 @@ public class DonationRepository implements PanacheRepository<Donation>
 			.list();
 	}
 
+	/**
+	 * Confirmed donations for a campaign that carry a non-blank message, newest
+	 * first.
+	 */
+	public List<Donation> listRecentConfirmedMessagesByCampaignId(UUID campaignId, int limit)
+	{
+		return find(
+			"campaign.id = ?1 and status = ?2 and message is not null and trim(message) <> '' order by createdAt desc",
+			campaignId, DonationStatus.CONFIRMED)
+				.page(0, limit)
+				.list();
+	}
+
 	public List<Donation> listAllOrdered()
 	{
 		return list("order by createdAt desc");

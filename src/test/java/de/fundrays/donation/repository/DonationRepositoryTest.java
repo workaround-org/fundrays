@@ -129,6 +129,45 @@ class DonationRepositoryTest
 		assertEquals(2, count);
 	}
 
+	@Test
+	void listRecentConfirmedMessagesByCampaignId_returnsOnlyConfirmedWithMessageNewestFirst()
+	{
+		// given
+		Campaign campaign = aCampaign();
+		campaignRepository.persist(campaign);
+		donationRepository.persist(aDonationWithMessage(campaign, DonationStatus.CONFIRMED, "Erste", Instant.now().minusSeconds(30)));
+		donationRepository.persist(aDonationWithMessage(campaign, DonationStatus.CONFIRMED, "Zweite", Instant.now().minusSeconds(10)));
+		donationRepository.persist(aDonationWithMessage(campaign, DonationStatus.PENDING, "Pending – ignoriert", Instant.now()));
+		donationRepository.persist(aDonationWithMessage(campaign, DonationStatus.CONFIRMED, null, Instant.now()));
+		donationRepository.persist(aDonationWithMessage(campaign, DonationStatus.CONFIRMED, "   ", Instant.now()));
+
+		// when
+		List<Donation> result = donationRepository.listRecentConfirmedMessagesByCampaignId(campaign.id, 5);
+
+		// then
+		assertEquals(2, result.size());
+		assertEquals("Zweite", result.get(0).message);
+		assertEquals("Erste", result.get(1).message);
+	}
+
+	@Test
+	void listRecentConfirmedMessagesByCampaignId_respectsLimit()
+	{
+		// given
+		Campaign campaign = aCampaign();
+		campaignRepository.persist(campaign);
+		for (int i = 0; i < 5; i++)
+		{
+			donationRepository.persist(aDonationWithMessage(campaign, DonationStatus.CONFIRMED, "Nachricht " + i, Instant.now().minusSeconds(60 - i)));
+		}
+
+		// when
+		List<Donation> result = donationRepository.listRecentConfirmedMessagesByCampaignId(campaign.id, 3);
+
+		// then
+		assertEquals(3, result.size());
+	}
+
 	private Campaign aCampaign()
 	{
 		Campaign c = new Campaign();
@@ -149,6 +188,19 @@ class DonationRepositoryTest
 		d.paymentMethod = PaymentMethod.PAYPAL;
 		d.paymentProviderRef = providerRef;
 		d.createdAt = Instant.now();
+		return d;
+	}
+
+	private Donation aDonationWithMessage(Campaign c, DonationStatus status, String message, Instant createdAt)
+	{
+		Donation d = new Donation();
+		d.campaign = c;
+		d.amount = 1000L;
+		d.status = status;
+		d.paymentMethod = PaymentMethod.PAYPAL;
+		d.message = message;
+		d.paymentProviderRef = "ref-" + System.nanoTime();
+		d.createdAt = createdAt;
 		return d;
 	}
 }

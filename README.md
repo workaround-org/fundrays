@@ -38,6 +38,7 @@ Requires Docker (Quarkus Dev Services starts a PostgreSQL container automaticall
 ```
 
 - Admin UI: http://localhost:8080/admin  
+- Public donation page: http://localhost:8080/donate/{slug}  
 - Swagger UI: http://localhost:8080/q/swagger-ui  
 - Dev credentials: `admin` / `admin123`
 
@@ -57,16 +58,25 @@ The resulting binary is at `target/*-runner`. The Docker image is built from `sr
 
 ## REST API
 
+**Public (unauthenticated)**
+
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/api/campaigns` | List all campaigns |
+| `GET` | `/api/public/campaigns/{slug}` | Campaign data for the donation page; 404 unless status is ACTIVE |
+| `GET` | `/api/public/campaigns/{slug}/progress` | Polling-friendly aggregate: raised amount (cents), goal, percentage, donation count, recent public donor messages |
+| `POST` | `/api/public/campaigns/{slug}/donate` | Initiate a donation; minimum 500 cents (5,00 €); returns `paymentUrl` |
+| `GET` | `/api/campaigns` | List all active campaigns |
 | `GET` | `/api/campaigns/{slug}` | Get a single campaign |
-| `POST` | `/api/campaigns` | Create a campaign (admin) |
-| `PATCH` | `/api/campaigns/{slug}` | Update a campaign (admin) |
-| `GET` | `/api/campaigns/{slug}/qrcode` | QR code for the donation URL (admin); `?format=png` (default) or `?format=svg`; optional `utm_*` params appended to encoded URL |
-| `GET` | `/api/donations` | List donations (admin) |
-| `POST` | `/api/donations/{slug}` | Record a donation |
 | `GET` | `/d/{slug}` | Short alias — 302 redirect to `/donate/{slug}` |
+
+**Admin (authentication required)**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/campaigns` | Create a campaign |
+| `PATCH` | `/api/campaigns/{slug}` | Update a campaign |
+| `GET` | `/api/campaigns/{slug}/qrcode` | QR code for the donation URL; `?format=png` (default) or `?format=svg`; optional `utm_*` params appended to encoded URL |
+| `GET` | `/api/donations` | List donations |
 
 ## CI / CD
 

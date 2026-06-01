@@ -1,0 +1,101 @@
+{#include tags/publicLayout}
+{#title}{campaign.title}{/title}
+{#content}
+
+{#if campaign.coverImageUrl}
+<img class="cover" src="{campaign.coverImageUrl}" alt="{campaign.title}">
+{/if}
+
+<h1>{campaign.title}</h1>
+
+<div class="card" id="campaign-card" data-slug="{campaign.slug}">
+  <div class="card-body">
+    <div class="thermo-head">
+      <span class="thermo-raised" id="raised">{raised.euros()}</span>
+      <span class="thermo-goal">von {campaign.goalAmount.euros()}</span>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-bar" id="prog-bar" style="width:{fmt:percent(raised, campaign.goalAmount)}%"></div>
+    </div>
+    <div class="thermo-meta">
+      <span id="percent">{fmt:percent(raised, campaign.goalAmount)}%</span>
+      <span><strong id="count">{count}</strong> Spenden</span>
+    </div>
+  </div>
+</div>
+
+{#if campaign.description}
+<div class="card"><div class="card-body">
+  <div class="description">{campaign.description.markdown()}</div>
+</div></div>
+{/if}
+
+<div class="card"><div class="card-body">
+  <h2>Jetzt spenden</h2>
+  <div class="alert alert-error" id="form-error"></div>
+
+  <form id="donate-form" data-slug="{campaign.slug}">
+    <div class="form-group">
+      <label>Betrag</label>
+      <div class="amount-grid">
+        <button type="button" class="amount-btn" data-euros="5">5 €</button>
+        <button type="button" class="amount-btn" data-euros="10">10 €</button>
+        <button type="button" class="amount-btn" data-euros="25">25 €</button>
+        <button type="button" class="amount-btn" data-euros="50">50 €</button>
+      </div>
+      <div class="input-euro">
+        <input class="form-control" type="number" id="amount-euros" name="amountEuros"
+               min="5" step="0.01" placeholder="Eigener Betrag" required>
+      </div>
+      <p class="form-hint">Mindestbetrag: 5,00 €</p>
+    </div>
+
+    <div class="form-group">
+      <label>Zahlungsart</label>
+      <div class="pay-grid">
+        {#for pm in paymentMethods}
+        <label class="pay-option">
+          <input type="radio" name="paymentMethod" value="{pm}" required>
+          <span>{#if pm.name() == "PAYPAL"}PayPal{#else if pm.name() == "WERO"}Wero{#else}Kreditkarte{/if}</span>
+        </label>
+        {/for}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="donorName">Anzeigename <span class="text-muted">(optional)</span></label>
+      <input class="form-control" type="text" id="donorName" name="donorName" maxlength="100">
+    </div>
+    <div class="form-group">
+      <label for="donorEmail">E-Mail <span class="text-muted">(optional)</span></label>
+      <input class="form-control" type="email" id="donorEmail" name="donorEmail" maxlength="200">
+      <p class="form-hint">Für die Spendenbestätigung.</p>
+    </div>
+    <div class="form-group">
+      <label for="message">Nachricht <span class="text-muted">(optional)</span></label>
+      <textarea class="form-control" id="message" name="message" maxlength="500"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary" id="submit-btn">Spenden</button>
+  </form>
+</div></div>
+
+<div class="card"><div class="card-body">
+  <h2>Letzte Nachrichten</h2>
+  <ul class="msg-list" id="msg-list">
+    {#if recentMessages.isEmpty()}
+    <li class="empty-state">Noch keine Nachrichten.</li>
+    {#else}
+    {#for d in recentMessages}
+    <li class="msg-item">
+      <div class="msg-text">{d.message}</div>
+      <div class="msg-author">— {d.donorName ?: "Anonym"}</div>
+    </li>
+    {/for}
+    {/if}
+  </ul>
+</div></div>
+
+<script src="/donate.js"></script>
+{/content}
+{/include}
