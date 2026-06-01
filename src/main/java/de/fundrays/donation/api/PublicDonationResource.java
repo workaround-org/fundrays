@@ -5,7 +5,6 @@ import de.fundrays.campaign.service.CampaignNotFoundException;
 import de.fundrays.donation.domain.Donation;
 import de.fundrays.donation.service.DonationService;
 import de.fundrays.shared.UnprocessableEntityException;
-import org.jboss.resteasy.reactive.ResponseStatus;
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -17,18 +16,16 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-@Path("/api/campaigns/{slug}/donations")
+@Path("/api/public/campaigns/{slug}/donate")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class DonationResource
+public class PublicDonationResource
 {
-
 	@Inject
 	DonationService donationService;
 
 	@POST
-	@ResponseStatus(201)
-	public DonationResponse submit(@PathParam("slug") String slug, @Valid CreateDonationRequest request)
+	public DonateResponse donate(@PathParam("slug") String slug, @Valid PublicDonateRequest request)
 	{
 		Donation donation = new Donation();
 		donation.amount = request.amount();
@@ -39,7 +36,8 @@ public class DonationResource
 
 		try
 		{
-			return toResponse(donationService.submit(slug, donation));
+			Donation saved = donationService.submit(slug, donation);
+			return toResponse(slug, saved);
 		}
 		catch (CampaignNotFoundException e)
 		{
@@ -51,8 +49,11 @@ public class DonationResource
 		}
 	}
 
-	private DonationResponse toResponse(Donation d)
+	private DonateResponse toResponse(String slug, Donation d)
 	{
-		return new DonationResponse(d.id, d.amount, d.currency, d.status, d.createdAt);
+		// Placeholder until real payment-provider URLs land (#6): redirect to
+		// the thank-you page.
+		String paymentUrl = "/donate/" + slug + "/thanks?donation=" + d.id;
+		return new DonateResponse(d.id, d.amount, d.currency, d.status, d.createdAt, paymentUrl);
 	}
 }

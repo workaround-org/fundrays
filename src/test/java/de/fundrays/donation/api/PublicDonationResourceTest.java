@@ -11,13 +11,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import jakarta.inject.Inject;
+
 import java.time.Instant;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @QuarkusTest
-class DonationResourceTest
+class PublicDonationResourceTest
 {
 
 	@Inject
@@ -36,7 +37,7 @@ class DonationResourceTest
 	}
 
 	@Test
-	void submit_createsDonationWithPendingStatus()
+	void donate_createsPendingDonationAndReturnsPaymentUrl()
 	{
 		// given
 		QuarkusTransaction.requiringNew().run(() -> campaignRepository.persist(aCampaign("active-campaign", CampaignStatus.ACTIVE)));
@@ -48,17 +49,37 @@ class DonationResourceTest
 		var response = given()
 			.contentType(ContentType.JSON)
 			.body(body)
-			.when().post("/api/campaigns/active-campaign/donations");
+			.when().post("/api/public/campaigns/active-campaign/donate");
 
 		// then
-		response.then().statusCode(201)
+		response.then().statusCode(200)
 			.body("id", notNullValue())
 			.body("amount", equalTo(1500))
-			.body("status", equalTo("PENDING"));
+			.body("status", equalTo("PENDING"))
+			.body("paymentUrl", containsString("/donate/active-campaign/thanks"));
 	}
 
 	@Test
-	void submit_returns404ForUnknownCampaign()
+	void donate_returns400ForAmountBelowMinimum()
+	{
+		// given — 499 cents is below the 500 cent minimum
+		QuarkusTransaction.requiringNew().run(() -> campaignRepository.persist(aCampaign("active-campaign", CampaignStatus.ACTIVE)));
+		var body = """
+			{"amount":499,"paymentMethod":"PAYPAL"}
+			""";
+
+		// when
+		var response = given()
+			.contentType(ContentType.JSON)
+			.body(body)
+			.when().post("/api/public/campaigns/active-campaign/donate");
+
+		// then
+		response.then().statusCode(400);
+	}
+
+	@Test
+	void donate_returns404ForUnknownCampaign()
 	{
 		// given — no campaigns in DB
 		var body = """
@@ -69,14 +90,14 @@ class DonationResourceTest
 		var response = given()
 			.contentType(ContentType.JSON)
 			.body(body)
-			.when().post("/api/campaigns/nonexistent/donations");
+			.when().post("/api/public/campaigns/nonexistent/donate");
 
 		// then
 		response.then().statusCode(404);
 	}
 
 	@Test
-	void submit_returns422ForInactiveCampaign()
+	void donate_returns422ForInactiveCampaign()
 	{
 		// given
 		QuarkusTransaction.requiringNew().run(() -> campaignRepository.persist(aCampaign("paused-campaign", CampaignStatus.PAUSED)));
@@ -88,29 +109,11 @@ class DonationResourceTest
 		var response = given()
 			.contentType(ContentType.JSON)
 			.body(body)
-			.when().post("/api/campaigns/paused-campaign/donations");
+			.when().post("/api/public/campaigns/paused-campaign/donate");
 
 		// then
 		response.then().statusCode(422)
 			.body("message", notNullValue());
-	}
-
-	@Test
-	void submit_returns400ForNonPositiveAmount()
-	{
-		// given — amount of 0 fails @Positive validation
-		var body = """
-			{"amount":0,"paymentMethod":"PAYPAL"}
-			""";
-
-		// when
-		var response = given()
-			.contentType(ContentType.JSON)
-			.body(body)
-			.when().post("/api/campaigns/any-campaign/donations");
-
-		// then
-		response.then().statusCode(400);
 	}
 
 	private Campaign aCampaign(String slug, CampaignStatus status)

@@ -1,0 +1,31 @@
+{#include tags/publicLayout}
+{#title}Danke{/title}
+{#content}
+
+<div class="card"><div class="card-body" style="text-align:center;">
+  <h1>Vielen Dank! 💚</h1>
+  <p class="text-muted">Deine Spende für <strong>{campaign.title}</strong> wird verarbeitet.
+    Sobald die Zahlung bestätigt ist, erscheint sie im Fortschritt.</p>
+</div></div>
+
+<div class="card"><div class="card-body">
+  <div class="section-label">Aktueller Fortschritt</div>
+  <div class="thermo-head">
+    <span class="thermo-raised">{raised.euros()}</span>
+    <span class="thermo-goal">von {campaign.goalAmount.euros()}</span>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-bar" style="width:{fmt:percent(raised, campaign.goalAmount)}%"></div>
+  </div>
+  <div class="thermo-meta">
+    <span>{fmt:percent(raised, campaign.goalAmount)}%</span>
+    <span><strong>{count}</strong> Spenden</span>
+  </div>
+</div></div>
+
+<div style="text-align:center;">
+  <a href="/donate/{campaign.slug}" style="color:var(--brand-dark);text-decoration:none;font-weight:600;">← Zurück zur Kampagne</a>
+</div>
+
+{/content}
+{/include}
