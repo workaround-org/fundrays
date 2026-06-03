@@ -6,6 +6,7 @@ import de.fundrays.campaign.service.CampaignService;
 import de.fundrays.donation.domain.Donation;
 import de.fundrays.donation.domain.PaymentMethod;
 import de.fundrays.donation.repository.DonationRepository;
+import de.fundrays.payment.wero.WeroConfig;
 import io.quarkiverse.renarde.Controller;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
@@ -26,17 +27,14 @@ public class DonationPage extends Controller
 	@ConfigProperty(name = "fundrays.base-url", defaultValue = "http://localhost:8080/")
 	String baseUrl;
 
-	/**
-	 * Payment methods offered on the public page. Wero is fully wired up in #6.
-	 */
-	private static final List<PaymentMethod> ENABLED_PAYMENT_METHODS = List.of(
-		PaymentMethod.PAYPAL, PaymentMethod.WERO, PaymentMethod.STRIPE);
-
 	@Inject
 	CampaignService campaignService;
 
 	@Inject
 	DonationRepository donationRepository;
+
+	@Inject
+	WeroConfig weroConfig;
 
 	@CheckedTemplate
 	static class Templates
@@ -62,7 +60,8 @@ public class DonationPage extends Controller
 		long count = campaignService.getDonationCount(campaign.id);
 		List<Donation> recentMessages = donationRepository
 			.listRecentConfirmedMessagesByCampaignId(campaign.id, RECENT_MESSAGES_LIMIT);
-		return Templates.index(campaign, raised, count, recentMessages, ENABLED_PAYMENT_METHODS, baseUrl);
+		List<PaymentMethod> paymentMethods = weroConfig.enabled() ? List.of(PaymentMethod.WERO) : List.of();
+		return Templates.index(campaign, raised, count, recentMessages, paymentMethods, baseUrl);
 	}
 
 	@GET
