@@ -3,7 +3,11 @@ package de.fundrays.donation.api;
 import de.fundrays.campaign.service.CampaignNotActiveException;
 import de.fundrays.campaign.service.CampaignNotFoundException;
 import de.fundrays.donation.domain.Donation;
+import de.fundrays.donation.service.DonationSubmission;
 import de.fundrays.donation.service.DonationService;
+import de.fundrays.donation.service.PaymentMethodUnavailableException;
+import de.fundrays.payment.wero.WeroGatewayException;
+import de.fundrays.shared.BadGatewayException;
 import de.fundrays.shared.UnprocessableEntityException;
 
 import jakarta.inject.Inject;
@@ -14,7 +18,9 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriInfo;
 
 @Path("/api/public/campaigns/{slug}/donate")
 @Produces(MediaType.APPLICATION_JSON)
@@ -25,7 +31,10 @@ public class PublicDonationResource
 	DonationService donationService;
 
 	@POST
-	public DonateResponse donate(@PathParam("slug") String slug, @Valid PublicDonateRequest request)
+	public DonateResponse donate(
+		@PathParam("slug") String slug,
+		@Valid PublicDonateRequest request,
+		@Context UriInfo uriInfo)
 	{
 		Donation donation = new Donation();
 		donation.amount = request.amount();
@@ -36,8 +45,12 @@ public class PublicDonationResource
 
 		try
 		{
-			Donation saved = donationService.submit(slug, donation);
-			return toResponse(slug, saved);
+			DonationSubmission submission = donationService.submit(
+				slug,
+				donation,
+				uriInfo.getBaseUriBuilder().path("donate").path(slug).path("thanks").build(),
+				uriInfo.getBaseUriBuilder().path("webhooks").path("wero").build());
+			return toResponse(submission);
 		}
 		catch (CampaignNotFoundException e)
 		{
@@ -47,13 +60,27 @@ public class PublicDonationResource
 		{
 			throw new UnprocessableEntityException(e.getMessage());
 		}
+		catch (PaymentMethodUnavailableException e)
+		{
+			throw new UnprocessableEntityException(e.getMessage());
+		}
+		catch (WeroGatewayException e)
+		{
+			throw new BadGatewayException("Wero payment could not be initiated");
+		}
 	}
 
-	private DonateResponse toResponse(String slug, Donation d)
+	private DonateResponse toResponse(DonationSubmission submission)
 	{
-		// Placeholder until real payment-provider URLs land (#6): redirect to
-		// the thank-you page.
-		String paymentUrl = "/donate/" + slug + "/thanks?donation=" + d.id;
-		return new DonateResponse(d.id, d.amount, d.currency, d.status, d.createdAt, paymentUrl);
+		Donation d = submission.donation();
+		return new DonateResponse(
+			d.id,
+			d.amount,
+			d.currency,
+			d.status,
+			d.createdAt,
+			submission.paymentUrl(),
+			submission.paymentDeepLink(),
+			submission.paymentQrPayload());
 	}
 }

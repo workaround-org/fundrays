@@ -5,6 +5,7 @@ import de.fundrays.donation.domain.DonationStatus;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.LockModeType;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +27,20 @@ public class DonationRepository implements PanacheRepository<Donation>
 	public Optional<Donation> findByProviderRef(String paymentProviderRef)
 	{
 		return find("paymentProviderRef", paymentProviderRef).firstResultOptional();
+	}
+
+	public Optional<Donation> findByIdForUpdate(UUID donationId)
+	{
+		return find("id", donationId)
+			.withLock(LockModeType.PESSIMISTIC_WRITE)
+			.firstResultOptional();
+	}
+
+	public Optional<Donation> findByProviderRefForUpdate(String paymentProviderRef)
+	{
+		return find("paymentProviderRef", paymentProviderRef)
+			.withLock(LockModeType.PESSIMISTIC_WRITE)
+			.firstResultOptional();
 	}
 
 	/** Total confirmed amount in cents for a campaign */
