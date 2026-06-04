@@ -17,7 +17,8 @@ import javax.imageio.ImageIO;
 @Path("/api/og")
 public class OgImageResource
 {
-	static {
+	static
+	{
 		// Required for headless server environments (no display)
 		System.setProperty("java.awt.headless", "true");
 	}
