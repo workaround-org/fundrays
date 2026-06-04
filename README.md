@@ -48,6 +48,28 @@ Requires Docker (Quarkus Dev Services starts a PostgreSQL container automaticall
 ./mvnw test
 ```
 
+## Wero gateway configuration
+
+The Wero adapter is disabled by default. Enable it and supply the gateway
+credentials through environment variables:
+
+| Variable | Description |
+|----------|-------------|
+| `WERO_ENABLED` | Set to `true` to offer Wero on the donation page |
+| `WERO_GATEWAY_BASE_URL` | Base URL of the configured Wero API gateway |
+| `WERO_API_KEY` | Bearer token used to create payment requests |
+| `WERO_WEBHOOK_SECRET` | HMAC-SHA256 secret for Wero webhook verification |
+
+The generic gateway adapter sends `POST /payments` with the local donation ID
+as both `merchantReference` and `Idempotency-Key`. It expects a JSON response
+containing `transactionId` and at least one of `paymentUrl` or `deepLink`;
+`qrPayload` is optional.
+
+Wero callbacks are accepted at `POST /webhooks/wero`. The
+`X-Wero-Signature` header must contain the hexadecimal HMAC-SHA256 of the raw
+JSON body, optionally prefixed with `sha256=`. The body must contain
+`transactionId` (or `paymentProviderRef`) and `status`.
+
 ## Building a native image
 
 ```bash
