@@ -33,6 +33,7 @@
           <th>Status</th>
           <th>Nachricht</th>
           <th>Datum</th>
+          <th>Aktion</th>
         </tr>
       </thead>
       <tbody>
@@ -54,6 +55,16 @@
             {d.message ?: "–"}
           </td>
           <td class="text-muted">{d.createdAt.isoDate()}</td>
+          <td>
+            {#if d.status.name() == "PENDING" && d.paymentMethod.name() == "WERO"}
+            <form method="post" action="/admin/donations/{d.id}/confirm">
+              <input type="hidden" name="{inject:csrf.parameterName}" value="{inject:csrf.token}">
+              <button type="submit" class="btn btn-primary btn-sm">Bestätigen</button>
+            </form>
+            {#else}
+            <span class="text-muted">–</span>
+            {/if}
+          </td>
         </tr>
         {/for}
       </tbody>
