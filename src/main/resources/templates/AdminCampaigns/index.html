@@ -46,6 +46,7 @@
           <td class="text-muted">{c.deadline.isoDate() ?: "–"}</td>
           <td>
             <div class="actions">
+              <a href="/donate/{c.slug}" target="_blank" class="btn btn-primary btn-sm">Spendenseite</a>
               <a href="/admin/campaigns/{c.slug}/edit" class="btn btn-secondary btn-sm">Bearbeiten</a>
               <a href="/admin/donations?campaign={c.slug}" class="btn btn-secondary btn-sm">Spenden</a>
               {#if c.status.name() == "ACTIVE" || c.status.name() == "PAUSED"}
