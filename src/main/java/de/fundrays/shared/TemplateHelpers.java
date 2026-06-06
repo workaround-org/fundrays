@@ -44,10 +44,11 @@ public class TemplateHelpers
 	}
 
 	/**
-	 * {someText.markdown()} → CommonMark rendered to HTML, returned as a RawString so Qute
-	 * does not re-escape it. Raw HTML in the source passes through unescaped, so this must
-	 * only be used on trusted, admin-authored content (e.g. campaign.description, set
-	 * exclusively via @RolesAllowed("admin") routes). Add a sanitizer before applying it to
+	 * {someText.markdown()} → CommonMark rendered to HTML, returned as a
+	 * RawString so Qute does not re-escape it. Raw HTML in the source passes
+	 * through unescaped, so this must only be used on trusted, admin-authored
+	 * content (e.g. campaign.description, set exclusively
+	 * via @RolesAllowed("admin") routes). Add a sanitizer before applying it to
 	 * any non-admin input.
 	 */
 	@TemplateExtension
