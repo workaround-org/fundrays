@@ -13,7 +13,6 @@ import java.util.UUID;
 @Entity
 public class Campaign
 {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	public UUID id;

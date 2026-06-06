@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestTransaction
 class CampaignRepositoryTest
 {
-
 	@Inject
 	CampaignRepository campaignRepository;
 

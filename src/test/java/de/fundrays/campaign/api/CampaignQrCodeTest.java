@@ -30,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @QuarkusTest
 class CampaignQrCodeTest
 {
-
 	private static final byte[] PNG_MAGIC = { (byte)0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n' };
 
 	@Inject

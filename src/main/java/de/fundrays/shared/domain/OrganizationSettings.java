@@ -13,7 +13,6 @@ import java.time.LocalDate;
 @Entity
 public class OrganizationSettings
 {
-
 	@Id
 	public Long id = 1L;
 

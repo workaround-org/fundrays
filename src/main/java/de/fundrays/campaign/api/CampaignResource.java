@@ -37,7 +37,6 @@ import java.util.Map;
 @Consumes(MediaType.APPLICATION_JSON)
 public class CampaignResource
 {
-
 	private static final int QR_CODE_SIZE_PX = 512;
 
 	@Inject

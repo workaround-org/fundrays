@@ -18,7 +18,6 @@ import java.util.UUID;
 @UserDefinition
 public class AdminUser
 {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	public UUID id;

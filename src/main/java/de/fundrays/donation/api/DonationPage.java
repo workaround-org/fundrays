@@ -37,6 +37,11 @@ public class DonationPage extends Controller
 	@CheckedTemplate
 	static class Templates
 	{
+		private Templates()
+		{
+			/* This utility class should not be instantiated */
+		}
+
 		static native TemplateInstance index(Campaign campaign, long raised, long count,
 			List<Donation> recentMessages, List<PaymentMethod> paymentMethods);
 

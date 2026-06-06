@@ -16,7 +16,6 @@ import java.util.UUID;
 @ApplicationScoped
 public class DonationService
 {
-
 	@Inject
 	CampaignRepository campaignRepository;
 

@@ -13,7 +13,6 @@ import java.util.UUID;
 @ApplicationScoped
 public class DonationRepository implements PanacheRepository<Donation>
 {
-
 	public List<Donation> findByCampaignId(UUID campaignId)
 	{
 		return list("campaign.id", campaignId);

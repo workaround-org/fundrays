@@ -17,6 +17,7 @@ import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.MockMailbox;
 import io.quarkus.narayana.jta.QuarkusTransaction;
 import io.quarkus.test.junit.QuarkusTest;
+import io.vertx.ext.mail.MailMessage;
 import jakarta.inject.Inject;
 import java.time.Instant;
 import java.util.List;
@@ -27,7 +28,6 @@ import org.junit.jupiter.api.Test;
 @QuarkusTest
 class DonationConfirmationMailerTest
 {
-
 	@Inject
 	DonationConfirmationMailer mailer;
 
@@ -142,9 +142,9 @@ class DonationConfirmationMailerTest
 		mailer.sendAdminNotification(donation);
 
 		// then
-		List<Mail> sent = mailbox.getMessagesSentTo("admin@demokratie.de");
+		List<MailMessage> sent = mailbox.getMailMessagesSentTo("admin@demokratie.de");
 		assertEquals(1, sent.size());
-		String body = sent.get(0).getText() != null ? sent.get(0).getText() : sent.get(0).getHtml();
+		String body = sent.getFirst().getText() != null ? sent.getFirst().getText() : sent.getFirst().getHtml();
 		assertNotNull(body);
 		assertTrue(body.contains("Climate"));
 		assertTrue(body.contains("50,00") || body.contains("50.00"));

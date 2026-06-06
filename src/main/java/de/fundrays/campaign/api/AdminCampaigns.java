@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @RolesAllowed("admin")
 public class AdminCampaigns extends Controller
 {
-
+	public static final String MESSAGE = "message";
 	@Inject
 	CampaignRepository campaignRepository;
 
@@ -44,6 +44,11 @@ public class AdminCampaigns extends Controller
 	@CheckedTemplate
 	static class Templates
 	{
+		private Templates()
+		{
+			/* This utility class should not be instantiated */
+		}
+
 		static native TemplateInstance index(List<Campaign> campaigns, Map<UUID, Long> raisedByCampaign);
 
 		static native TemplateInstance create();
@@ -105,7 +110,7 @@ public class AdminCampaigns extends Controller
 			return;
 		}
 
-		flash("message", "Kampagne erstellt.");
+		flash(MESSAGE, "Kampagne erstellt.");
 		index();
 	}
 
@@ -115,6 +120,7 @@ public class AdminCampaigns extends Controller
 	{
 		Campaign campaign = campaignRepository.findBySlug(slug).orElse(null);
 		notFoundIfNull(campaign);
+		assert campaign != null;
 		String deadlineValue = campaign.deadline != null
 			? campaign.deadline.atZone(ZoneOffset.UTC).toLocalDate().toString()
 			: "";
@@ -133,7 +139,6 @@ public class AdminCampaigns extends Controller
 		@RestForm String coverImageUrl,
 		@RestForm String status)
 	{
-
 		if (validationFailed())
 		{
 			edit(slug);
@@ -152,7 +157,7 @@ public class AdminCampaigns extends Controller
 			}
 		});
 
-		flash("message", "Kampagne aktualisiert.");
+		flash(MESSAGE, "Kampagne aktualisiert.");
 		index();
 	}
 
@@ -162,7 +167,7 @@ public class AdminCampaigns extends Controller
 	public void archive(@RestPath String slug)
 	{
 		campaignService.update(slug, c -> c.status = CampaignStatus.ARCHIVED);
-		flash("message", "Kampagne archiviert.");
+		flash(MESSAGE, "Kampagne archiviert.");
 		index();
 	}
 
@@ -172,7 +177,7 @@ public class AdminCampaigns extends Controller
 	public void activate(@RestPath String slug)
 	{
 		campaignService.update(slug, c -> c.status = CampaignStatus.ACTIVE);
-		flash("message", "Kampagne aktiviert.");
+		flash(MESSAGE, "Kampagne aktiviert.");
 		index();
 	}
 

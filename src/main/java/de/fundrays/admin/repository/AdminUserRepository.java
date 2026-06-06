@@ -10,7 +10,6 @@ import java.util.Optional;
 @ApplicationScoped
 public class AdminUserRepository implements PanacheRepository<AdminUser>
 {
-
 	public Optional<AdminUser> findByUsername(String username)
 	{
 		return find("username", username).firstResultOptional();

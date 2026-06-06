@@ -17,7 +17,6 @@ import java.util.UUID;
 @Entity
 public class Donation
 {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	public UUID id;

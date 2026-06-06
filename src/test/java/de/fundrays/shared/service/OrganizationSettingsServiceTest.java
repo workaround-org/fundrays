@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 @TestTransaction
 class OrganizationSettingsServiceTest
 {
-
 	@Inject
 	OrganizationSettingsService settingsService;
 

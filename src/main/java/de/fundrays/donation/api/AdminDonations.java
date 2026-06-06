@@ -19,7 +19,6 @@ import java.util.List;
 @RolesAllowed("admin")
 public class AdminDonations extends Controller
 {
-
 	@Inject
 	DonationRepository donationRepository;
 
@@ -29,6 +28,11 @@ public class AdminDonations extends Controller
 	@CheckedTemplate
 	static class Templates
 	{
+		private Templates()
+		{
+			/* This utility class should not be instantiated */
+		}
+
 		static native TemplateInstance index(List<Donation> donations, Campaign filterCampaign);
 	}
 

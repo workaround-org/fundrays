@@ -12,7 +12,6 @@ import java.util.Optional;
 @ApplicationScoped
 public class CampaignRepository implements PanacheRepository<Campaign>
 {
-
 	public Optional<Campaign> findBySlug(String slug)
 	{
 		return find("slug", slug).firstResultOptional();

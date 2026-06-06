@@ -4,7 +4,6 @@ import java.util.UUID;
 
 public class DonationNotFoundException extends RuntimeException
 {
-
 	private final UUID donationId;
 
 	public DonationNotFoundException(UUID donationId)

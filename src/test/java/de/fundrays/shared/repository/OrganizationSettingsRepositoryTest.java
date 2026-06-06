@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestTransaction
 class OrganizationSettingsRepositoryTest
 {
-
 	@Inject
 	OrganizationSettingsRepository settingsRepository;
 

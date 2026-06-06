@@ -9,7 +9,6 @@ import static org.hamcrest.Matchers.endsWith;
 @QuarkusTest
 class ShortLinkResourceTest
 {
-
 	@Test
 	void shortlink_redirectsToDonatePage()
 	{

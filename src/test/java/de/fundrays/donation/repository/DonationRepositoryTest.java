@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestTransaction
 class DonationRepositoryTest
 {
-
 	@Inject
 	DonationRepository donationRepository;
 

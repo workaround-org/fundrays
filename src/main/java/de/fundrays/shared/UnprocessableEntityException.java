@@ -6,7 +6,6 @@ import jakarta.ws.rs.core.Response;
 
 public class UnprocessableEntityException extends WebApplicationException
 {
-
 	public UnprocessableEntityException(String message)
 	{
 		super(Response.status(422)

@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 @QuarkusTest
 class DonationServiceConfirmTest
 {
-
 	@Inject
 	DonationService donationService;
 
@@ -82,7 +81,7 @@ class DonationServiceConfirmTest
 			assertEquals(DonationStatus.CONFIRMED, reloaded.status);
 			assertNotNull(reloaded.confirmedAt);
 		});
-		assertEquals(1, mailbox.getMessagesSentTo("donor@example.org").size());
+		assertEquals(1, mailbox.getMailMessagesSentTo("donor@example.org").size());
 	}
 
 	@Test
@@ -96,7 +95,7 @@ class DonationServiceConfirmTest
 		donationService.confirm(donationId);
 
 		// then
-		assertEquals(1, mailbox.getMessagesSentTo("donor@example.org").size());
+		assertEquals(1, mailbox.getMailMessagesSentTo("donor@example.org").size());
 	}
 
 	@Test

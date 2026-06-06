@@ -2,7 +2,6 @@ package de.fundrays.campaign.service;
 
 public class SlugConflictException extends RuntimeException
 {
-
 	private final String slug;
 
 	public SlugConflictException(String slug)

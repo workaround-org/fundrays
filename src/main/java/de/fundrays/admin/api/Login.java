@@ -10,10 +10,14 @@ import jakarta.ws.rs.QueryParam;
 @Path("/login")
 public class Login extends Controller
 {
-
 	@CheckedTemplate
 	static class Templates
 	{
+		private Templates()
+		{
+			/* This utility class should not be instantiated */
+		}
+
 		static native TemplateInstance login(boolean error);
 	}
 

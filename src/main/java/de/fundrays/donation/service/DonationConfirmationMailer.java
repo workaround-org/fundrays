@@ -9,15 +9,16 @@ import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class DonationConfirmationMailer
 {
-
 	private static final Logger LOG = Logger.getLogger(DonationConfirmationMailer.class);
 	private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN);
 
@@ -30,6 +31,11 @@ public class DonationConfirmationMailer
 	@CheckedTemplate(basePath = "mail")
 	static class Templates
 	{
+		private Templates()
+		{
+			/* This utility class should not be instantiated */
+		}
+
 		static native TemplateInstance donorConfirmation(
 			String orgName,
 			String campaignTitle,

@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 @QuarkusTest
 class AdminOrganizationSettingsTest
 {
-
 	@Inject
 	OrganizationSettingsRepository settingsRepository;
 

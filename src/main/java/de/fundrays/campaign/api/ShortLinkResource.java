@@ -9,7 +9,6 @@ import java.net.URI;
 @Path("/d")
 public class ShortLinkResource
 {
-
 	@GET
 	@Path("/{slug}")
 	public Response redirect(@PathParam("slug") String slug)

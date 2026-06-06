@@ -18,7 +18,6 @@ import java.util.function.Consumer;
 @ApplicationScoped
 public class CampaignService
 {
-
 	@Inject
 	CampaignRepository campaignRepository;
 

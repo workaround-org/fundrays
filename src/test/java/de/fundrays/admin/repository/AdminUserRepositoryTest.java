@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestTransaction
 class AdminUserRepositoryTest
 {
-
 	@Inject
 	AdminUserRepository adminUserRepository;
 

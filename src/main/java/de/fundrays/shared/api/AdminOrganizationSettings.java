@@ -17,7 +17,6 @@ import org.jboss.resteasy.reactive.RestForm;
 @RolesAllowed("admin")
 public class AdminOrganizationSettings extends Controller
 {
-
 	@Inject
 	OrganizationSettingsService settingsService;
 

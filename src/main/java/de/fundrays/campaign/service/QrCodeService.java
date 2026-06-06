@@ -16,7 +16,6 @@ import java.util.Map;
 @ApplicationScoped
 public class QrCodeService
 {
-
 	private static final int MARGIN = 1;
 
 	public byte[] renderPng(String payload, int size)

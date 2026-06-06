@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.*;
 @QuarkusTest
 class DonationPageTest
 {
-
 	@Inject
 	CampaignRepository campaignRepository;
 

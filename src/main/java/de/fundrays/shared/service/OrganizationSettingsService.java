@@ -9,7 +9,6 @@ import jakarta.transaction.Transactional;
 @ApplicationScoped
 public class OrganizationSettingsService
 {
-
 	@Inject
 	OrganizationSettingsRepository settingsRepository;
 

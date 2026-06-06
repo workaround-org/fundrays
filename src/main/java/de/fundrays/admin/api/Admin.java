@@ -21,7 +21,6 @@ import java.util.List;
 @RolesAllowed("admin")
 public class Admin extends Controller
 {
-
 	@Inject
 	CampaignRepository campaignRepository;
 
@@ -34,6 +33,11 @@ public class Admin extends Controller
 	@CheckedTemplate
 	static class Templates
 	{
+		private Templates()
+		{
+			/* This utility class should not be instantiated */
+		}
+
 		static native TemplateInstance index(
 			long totalCampaigns,
 			long activeCampaigns,
