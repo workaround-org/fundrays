@@ -55,10 +55,11 @@ credentials through environment variables:
 
 | Variable | Description |
 |----------|-------------|
-| `WERO_ENABLED` | Set to `true` to offer Wero on the donation page |
-| `WERO_GATEWAY_BASE_URL` | Base URL of the configured Wero API gateway |
-| `WERO_API_KEY` | Bearer token used to create payment requests |
-| `WERO_WEBHOOK_SECRET` | HMAC-SHA256 secret for Wero webhook verification |
+| `FUNDRAYS_WERO_ENABLED` | Set to `true` to offer Wero on the donation page |
+| `QUARKUS_REST_CLIENT_WERO_API_URL` | Base URL of the configured Wero API gateway |
+| `FUNDRAYS_WERO_API_KEY` | Bearer token used to create payment requests |
+| `FUNDRAYS_WERO_WEBHOOK_SECRET` | HMAC-SHA256 secret for Wero webhook verification |
+| `FUNDRAYS_BASE_URL` | Public base URL of the app (used for absolute og:image URLs, must end with `/`; defaults to `http://localhost:8080/`) |
 
 The generic gateway adapter sends `POST /payments` with the local donation ID
 as both `merchantReference` and `Idempotency-Key`. It expects a JSON response
