@@ -14,6 +14,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.List;
 
@@ -21,6 +22,9 @@ import java.util.List;
 public class DonationPage extends Controller
 {
 	private static final int RECENT_MESSAGES_LIMIT = 5;
+
+	@ConfigProperty(name = "fundrays.base-url", defaultValue = "http://localhost:8080/")
+	String baseUrl;
 
 	/**
 	 * Payment methods offered on the public page. Wero is fully wired up in #6.
@@ -43,7 +47,7 @@ public class DonationPage extends Controller
 		}
 
 		static native TemplateInstance index(Campaign campaign, long raised, long count,
-			List<Donation> recentMessages, List<PaymentMethod> paymentMethods);
+			List<Donation> recentMessages, List<PaymentMethod> paymentMethods, String baseUrl);
 
 		static native TemplateInstance thanks(Campaign campaign, long raised, long count);
 	}
@@ -58,7 +62,7 @@ public class DonationPage extends Controller
 		long count = campaignService.getDonationCount(campaign.id);
 		List<Donation> recentMessages = donationRepository
 			.listRecentConfirmedMessagesByCampaignId(campaign.id, RECENT_MESSAGES_LIMIT);
-		return Templates.index(campaign, raised, count, recentMessages, ENABLED_PAYMENT_METHODS);
+		return Templates.index(campaign, raised, count, recentMessages, ENABLED_PAYMENT_METHODS, baseUrl);
 	}
 
 	@GET
