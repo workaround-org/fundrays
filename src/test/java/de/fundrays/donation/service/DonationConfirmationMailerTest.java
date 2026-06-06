@@ -76,9 +76,9 @@ class DonationConfirmationMailerTest
 		mailer.sendConfirmation(donation);
 
 		// then
-		List<Mail> sent = mailbox.getMessagesSentTo("donor@example.org");
+		List<MailMessage> sent = mailbox.getMailMessagesSentTo("donor@example.org");
 		assertEquals(1, sent.size());
-		Mail mail = sent.get(0);
+		MailMessage mail = sent.getFirst();
 		assertNotNull(mail.getSubject());
 		String body = mail.getText() != null ? mail.getText() : mail.getHtml();
 		assertNotNull(body);
@@ -98,9 +98,9 @@ class DonationConfirmationMailerTest
 		mailer.sendConfirmation(donation);
 
 		// then
-		List<Mail> sent = mailbox.getMessagesSentTo("donor@example.org");
+		List<MailMessage> sent = mailbox.getMailMessagesSentTo("donor@example.org");
 		assertEquals(1, sent.size());
-		assertEquals("noreply@demokratie.de", sent.get(0).getFrom());
+		assertEquals("noreply@demokratie.de", sent.getFirst().getFrom());
 	}
 
 	@Test
