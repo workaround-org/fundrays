@@ -79,8 +79,8 @@ class AdminDonationsTest
 			Donation donation = new Donation();
 			donation.campaign = campaign;
 			donation.amount = 1500L;
-			donation.paymentMethod = PaymentMethod.WERO;
-			donation.paymentProviderRef = "wero-manual";
+			donation.paymentMethod = PaymentMethod.MOLLIE;
+			donation.paymentProviderRef = "mollie-manual";
 			donation.status = DonationStatus.PENDING;
 			donation.createdAt = Instant.now();
 			donationRepository.persist(donation);

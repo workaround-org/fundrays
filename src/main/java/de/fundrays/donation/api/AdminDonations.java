@@ -68,8 +68,8 @@ public class AdminDonations extends Controller
 	{
 		try
 		{
-			donationService.confirmWeroManually(id);
-			flash("message", "Wero-Spende manuell bestätigt.");
+			donationService.confirmMollieManually(id);
+			flash("message", "Spende manuell bestätigt.");
 		}
 		catch (DonationNotFoundException | DonationStateTransitionException | PaymentMethodUnavailableException e)
 		{

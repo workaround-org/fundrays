@@ -3,13 +3,12 @@ package de.fundrays.donation.api;
 import de.fundrays.campaign.service.CampaignNotActiveException;
 import de.fundrays.campaign.service.CampaignNotFoundException;
 import de.fundrays.donation.domain.Donation;
-import de.fundrays.donation.service.DonationSubmission;
 import de.fundrays.donation.service.DonationService;
+import de.fundrays.donation.service.DonationSubmission;
 import de.fundrays.donation.service.PaymentMethodUnavailableException;
-import de.fundrays.payment.wero.WeroGatewayException;
+import de.fundrays.payment.mollie.MollieGatewayException;
 import de.fundrays.shared.BadGatewayException;
 import de.fundrays.shared.UnprocessableEntityException;
-
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -49,7 +48,7 @@ public class PublicDonationResource
 				slug,
 				donation,
 				uriInfo.getBaseUriBuilder().path("donate").path(slug).path("thanks").build(),
-				uriInfo.getBaseUriBuilder().path("webhooks").path("wero").build());
+				uriInfo.getBaseUriBuilder().path("webhooks").path("mollie").build());
 			return toResponse(submission);
 		}
 		catch (CampaignNotFoundException e)
@@ -64,9 +63,9 @@ public class PublicDonationResource
 		{
 			throw new UnprocessableEntityException(e.getMessage());
 		}
-		catch (WeroGatewayException e)
+		catch (MollieGatewayException e)
 		{
-			throw new BadGatewayException("Wero payment could not be initiated");
+			throw new BadGatewayException("Payment could not be initiated");
 		}
 	}
 
@@ -79,8 +78,6 @@ public class PublicDonationResource
 			d.currency,
 			d.status,
 			d.createdAt,
-			submission.paymentUrl(),
-			submission.paymentDeepLink(),
-			submission.paymentQrPayload());
+			submission.paymentUrl());
 	}
 }
