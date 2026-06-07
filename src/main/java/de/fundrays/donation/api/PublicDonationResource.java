@@ -20,12 +20,18 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+import java.net.URI;
 
 @Path("/api/public/campaigns/{slug}/donate")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class PublicDonationResource
 {
+	@ConfigProperty(name = "fundrays.base-url", defaultValue = "http://localhost:8080/")
+	String baseUrl;
+
 	@Inject
 	DonationService donationService;
 
@@ -48,7 +54,7 @@ public class PublicDonationResource
 				slug,
 				donation,
 				uriInfo.getBaseUriBuilder().path("donate").path(slug).path("thanks").build(),
-				uriInfo.getBaseUriBuilder().path("webhooks").path("mollie").build());
+				URI.create(baseUrl + "webhooks/mollie"));
 			return toResponse(submission);
 		}
 		catch (CampaignNotFoundException e)
