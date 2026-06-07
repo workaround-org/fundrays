@@ -1,3 +1,6 @@
+# Secrets
+.env
+
 # Maven build output
 target/
 
