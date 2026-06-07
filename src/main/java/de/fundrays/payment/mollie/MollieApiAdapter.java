@@ -4,11 +4,12 @@ import com.mollie.mollie.Client;
 import com.mollie.mollie.models.components.Amount;
 import com.mollie.mollie.models.components.PaymentRequest;
 import com.mollie.mollie.models.components.PaymentResponseStatus;
-import com.mollie.mollie.models.errors.ErrorResponse;
+import com.mollie.mollie.models.errors.ClientError;
 import com.mollie.mollie.models.operations.GetPaymentRequest;
 import de.fundrays.donation.domain.Donation;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.jboss.logging.Logger;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,6 +18,8 @@ import java.net.URI;
 @ApplicationScoped
 public class MollieApiAdapter
 {
+	private static final Logger log = Logger.getLogger(MollieApiAdapter.class);
+
 	@Inject
 	Client mollieClient;
 
@@ -51,13 +54,16 @@ public class MollieApiAdapter
 
 			return new PaymentInitiation(payment.id(), checkoutUrl);
 		}
-		catch (ErrorResponse e)
+		catch (ClientError e)
 		{
+			log.errorf("Mollie API error creating payment: status=%d body=%s", e.code(),
+				e.bodyAsString().orElse("(empty)"));
 			if (e.code() == 429 || e.code() >= 500)
 			{
 				throw new MollieTransientGatewayException("Mollie gateway temporarily unavailable: " + e.code());
 			}
-			throw new MollieGatewayException("Mollie payment creation failed: " + e.getMessage());
+			throw new MollieGatewayException("Mollie payment creation failed: status=" + e.code()
+				+ " body=" + e.bodyAsString().orElse("(empty)"));
 		}
 		catch (MollieGatewayException e)
 		{
@@ -65,6 +71,7 @@ public class MollieApiAdapter
 		}
 		catch (Exception e)
 		{
+			log.errorf(e, "Unexpected exception creating Mollie payment");
 			throw new MollieTransientGatewayException("Mollie request failed: " + e.getMessage());
 		}
 	}
@@ -83,9 +90,12 @@ public class MollieApiAdapter
 				.map(p -> p.status())
 				.orElseThrow(() -> new MollieGatewayException("Mollie payment not found: " + paymentId));
 		}
-		catch (ErrorResponse e)
+		catch (ClientError e)
 		{
-			throw new MollieGatewayException("Mollie payment fetch failed: " + e.getMessage());
+			log.errorf("Mollie API error fetching payment status: status=%d body=%s", e.code(),
+				e.bodyAsString().orElse("(empty)"));
+			throw new MollieGatewayException("Mollie payment fetch failed: status=" + e.code()
+				+ " body=" + e.bodyAsString().orElse("(empty)"));
 		}
 		catch (MollieGatewayException e)
 		{
