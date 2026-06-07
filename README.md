@@ -9,7 +9,7 @@
   <a href="https://github.com/workaround-org/fundrays/pkgs/container/fundrays">
     <img src="https://img.shields.io/badge/container-ghcr.io-ed2a91?logo=docker&logoColor=white" alt="Container">
   </a>
-  <img src="https://img.shields.io/badge/Quarkus-3.35.4-4695EB?logo=quarkus&logoColor=white" alt="Quarkus">
+  <img src="https://img.shields.io/badge/Quarkus-3.36.1-4695EB?logo=quarkus&logoColor=white" alt="Quarkus">
   <img src="https://img.shields.io/badge/Java-25-ed2a91?logo=openjdk&logoColor=white" alt="Java 25">
   <img src="https://img.shields.io/badge/native-GraalVM-ed2a91" alt="GraalVM native">
   <img src="https://img.shields.io/github/license/workaround-org/fundrays?color=ed2a91" alt="MIT License">
@@ -29,6 +29,16 @@
 - **quarkus-smallrye-openapi** — OpenAPI / Swagger UI
 - **quarkus-mailer** — donor confirmation + admin notification mails (SMTP, Qute mail templates)
 
+## Local setup
+
+Copy the example env file and fill in your credentials:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and paste your [Mollie test API key](https://my.mollie.com/dashboard/developers/api-keys). The file is gitignored.
+
 ## Running in dev mode
 
 Requires Docker (Quarkus Dev Services starts a PostgreSQL container automatically).
@@ -42,34 +52,28 @@ Requires Docker (Quarkus Dev Services starts a PostgreSQL container automaticall
 - Swagger UI: http://localhost:8080/q/swagger-ui  
 - Dev credentials: `admin` / `admin123`
 
+Mollie is enabled automatically in dev mode when `FUNDRAYS_MOLLIE_API_KEY` is present in `.env`.
+
 ## Running tests
 
 ```bash
 ./mvnw test
 ```
 
-## Wero gateway configuration
+Unit tests mock the Mollie gateway — no API key needed. Three additional live tests
+(`MolliePaymentLiveTest`) hit the real Mollie test API and are skipped unless a real key is configured in `.env`.
 
-The Wero adapter is disabled by default. Enable it and supply the gateway
-credentials through environment variables:
+## Mollie payment gateway
+
+Payments are processed via [Mollie](https://mollie.com). Mollie's hosted checkout supports all major payment methods.
 
 | Variable | Description |
 |----------|-------------|
-| `FUNDRAYS_WERO_ENABLED` | Set to `true` to offer Wero on the donation page |
-| `QUARKUS_REST_CLIENT_WERO_API_URL` | Base URL of the configured Wero API gateway |
-| `FUNDRAYS_WERO_API_KEY` | Bearer token used to create payment requests |
-| `FUNDRAYS_WERO_WEBHOOK_SECRET` | HMAC-SHA256 secret for Wero webhook verification |
-| `FUNDRAYS_BASE_URL` | Public base URL of the app (used for absolute og:image URLs, must end with `/`; defaults to `http://localhost:8080/`) |
+| `FUNDRAYS_MOLLIE_API_KEY` | Mollie API key (`test_...` for test mode, `live_...` for production) |
+| `FUNDRAYS_MOLLIE_ENABLED` | Set to `true` to enable payments (dev mode sets this automatically) |
+| `FUNDRAYS_BASE_URL` | Public base URL of the app, must end with `/` (defaults to `http://localhost:8080/`) |
 
-The generic gateway adapter sends `POST /payments` with the local donation ID
-as both `merchantReference` and `Idempotency-Key`. It expects a JSON response
-containing `transactionId` and at least one of `paymentUrl` or `deepLink`;
-`qrPayload` is optional.
-
-Wero callbacks are accepted at `POST /webhooks/wero`. The
-`X-Wero-Signature` header must contain the hexadecimal HMAC-SHA256 of the raw
-JSON body, optionally prefixed with `sha256=`. The body must contain
-`transactionId` (or `paymentProviderRef`) and `status`.
+Mollie sends payment status updates to `POST /webhooks/mollie` as a form-encoded body containing the payment ID. The application then fetches the payment status from the Mollie API to confirm or fail the donation.
 
 ## Building a native image
 
