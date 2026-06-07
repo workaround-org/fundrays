@@ -32,17 +32,34 @@ public class MollieApiAdapter
 
 		try
 		{
+			String host = webhookUrl.getHost();
+			boolean reachableByMollie = host != null
+				&& !host.equals("localhost")
+				&& !host.startsWith("127.")
+				&& !host.equals("::1");
+
+			if (!reachableByMollie)
+			{
+				log.warnf("Webhook URL %s is not reachable from Mollie — omitting webhookUrl from payment request",
+					webhookUrl);
+			}
+
+			var paymentBuilder = PaymentRequest.builder()
+				.description(donation.campaign.title)
+				.amount(Amount.builder()
+					.currency(donation.currency)
+					.value(amountValue)
+					.build())
+				.redirectUrl(returnUrl.toString());
+
+			if (reachableByMollie)
+			{
+				paymentBuilder.webhookUrl(webhookUrl.toString());
+			}
+
 			var res = mollieClient.payments().create()
 				.idempotencyKey(donation.id.toString())
-				.paymentRequest(PaymentRequest.builder()
-					.description(donation.campaign.title)
-					.amount(Amount.builder()
-						.currency(donation.currency)
-						.value(amountValue)
-						.build())
-					.redirectUrl(returnUrl.toString())
-					.webhookUrl(webhookUrl.toString())
-					.build())
+				.paymentRequest(paymentBuilder.build())
 				.call();
 
 			var payment = res.paymentResponse()
