@@ -11,8 +11,6 @@ public record DonateResponse(
 	String currency,
 	DonationStatus status,
 	Instant createdAt,
-	String paymentUrl,
-	String paymentDeepLink,
-	String paymentQrPayload)
+	String paymentUrl)
 {
 }

@@ -6,7 +6,7 @@ import de.fundrays.campaign.service.CampaignService;
 import de.fundrays.donation.domain.Donation;
 import de.fundrays.donation.domain.PaymentMethod;
 import de.fundrays.donation.repository.DonationRepository;
-import de.fundrays.payment.wero.WeroConfig;
+import de.fundrays.payment.mollie.MollieConfig;
 import io.quarkiverse.renarde.Controller;
 import io.quarkus.qute.CheckedTemplate;
 import io.quarkus.qute.TemplateInstance;
@@ -34,7 +34,7 @@ public class DonationPage extends Controller
 	DonationRepository donationRepository;
 
 	@Inject
-	WeroConfig weroConfig;
+	MollieConfig mollieConfig;
 
 	@CheckedTemplate
 	static class Templates
@@ -60,7 +60,7 @@ public class DonationPage extends Controller
 		long count = campaignService.getDonationCount(campaign.id);
 		List<Donation> recentMessages = donationRepository
 			.listRecentConfirmedMessagesByCampaignId(campaign.id, RECENT_MESSAGES_LIMIT);
-		List<PaymentMethod> paymentMethods = weroConfig.enabled() ? List.of(PaymentMethod.WERO) : List.of();
+		List<PaymentMethod> paymentMethods = mollieConfig.enabled() ? List.of(PaymentMethod.MOLLIE) : List.of();
 		return Templates.index(campaign, raised, count, recentMessages, paymentMethods, baseUrl);
 	}
 

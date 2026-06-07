@@ -76,7 +76,7 @@
         {#for pm in paymentMethods}
         <label class="pay-option">
           <input type="radio" name="paymentMethod" value="{pm}" required>
-          <span>{#if pm.name() == "PAYPAL"}PayPal{#else if pm.name() == "WERO"}Wero{#else}Kreditkarte{/if}</span>
+          <span>{#if pm.name() == "PAYPAL"}PayPal{#else if pm.name() == "MOLLIE"}Online bezahlen{#else}Kreditkarte{/if}</span>
         </label>
         {/for}
       </div>

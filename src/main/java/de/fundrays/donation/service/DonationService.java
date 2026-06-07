@@ -8,12 +8,13 @@ import de.fundrays.donation.domain.Donation;
 import de.fundrays.donation.domain.DonationStatus;
 import de.fundrays.donation.domain.PaymentMethod;
 import de.fundrays.donation.repository.DonationRepository;
-import de.fundrays.payment.wero.WeroConfig;
-import de.fundrays.payment.wero.WeroGateway;
-import de.fundrays.payment.wero.WeroPaymentInitiation;
+import de.fundrays.payment.mollie.MollieConfig;
+import de.fundrays.payment.mollie.MollieGateway;
+import de.fundrays.payment.mollie.PaymentInitiation;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+
 import java.net.URI;
 import java.time.Instant;
 import java.util.UUID;
@@ -31,10 +32,10 @@ public class DonationService
 	DonationConfirmationMailer confirmationMailer;
 
 	@Inject
-	WeroGateway weroGateway;
+	MollieGateway mollieGateway;
 
 	@Inject
-	WeroConfig weroConfig;
+	MollieConfig mollieConfig;
 
 	@Transactional
 	public DonationSubmission submit(String campaignSlug, Donation donation, URI returnUrl, URI webhookUrl)
@@ -45,7 +46,7 @@ public class DonationService
 		{
 			throw new CampaignNotActiveException(campaignSlug);
 		}
-		if (donation.paymentMethod != PaymentMethod.WERO || !weroConfig.enabled())
+		if (donation.paymentMethod != PaymentMethod.MOLLIE || !mollieConfig.enabled())
 		{
 			throw new PaymentMethodUnavailableException(donation.paymentMethod);
 		}
@@ -54,13 +55,9 @@ public class DonationService
 		donationRepository.persist(donation);
 		donationRepository.flush();
 
-		WeroPaymentInitiation payment = weroGateway.initiate(donation, returnUrl, webhookUrl);
-		donation.paymentProviderRef = payment.transactionId();
-		return new DonationSubmission(
-			donation,
-			payment.redirectUrl(),
-			payment.deepLink(),
-			payment.qrPayload());
+		PaymentInitiation payment = mollieGateway.initiate(donation, returnUrl, webhookUrl);
+		donation.paymentProviderRef = payment.paymentId();
+		return new DonationSubmission(donation, payment.checkoutUrl());
 	}
 
 	/**
@@ -79,14 +76,14 @@ public class DonationService
 	@Transactional
 	public Donation confirmByProviderRef(String paymentProviderRef)
 	{
-		Donation donation = findWeroByProviderRefForUpdate(paymentProviderRef);
+		Donation donation = findMollieByProviderRefForUpdate(paymentProviderRef);
 		return confirmPending(donation);
 	}
 
 	@Transactional
 	public Donation failByProviderRef(String paymentProviderRef)
 	{
-		Donation donation = findWeroByProviderRefForUpdate(paymentProviderRef);
+		Donation donation = findMollieByProviderRefForUpdate(paymentProviderRef);
 		if (donation.status == DonationStatus.FAILED || donation.status == DonationStatus.CONFIRMED)
 		{
 			return donation;
@@ -100,22 +97,22 @@ public class DonationService
 	}
 
 	@Transactional
-	public Donation confirmWeroManually(UUID donationId)
+	public Donation confirmMollieManually(UUID donationId)
 	{
 		Donation donation = donationRepository.findByIdForUpdate(donationId)
 			.orElseThrow(() -> new DonationNotFoundException(donationId));
-		if (donation.paymentMethod != PaymentMethod.WERO)
+		if (donation.paymentMethod != PaymentMethod.MOLLIE)
 		{
 			throw new PaymentMethodUnavailableException(donation.paymentMethod);
 		}
 		return confirmPending(donation);
 	}
 
-	private Donation findWeroByProviderRefForUpdate(String paymentProviderRef)
+	private Donation findMollieByProviderRefForUpdate(String paymentProviderRef)
 	{
 		Donation donation = donationRepository.findByProviderRefForUpdate(paymentProviderRef)
 			.orElseThrow(() -> new DonationProviderRefNotFoundException(paymentProviderRef));
-		if (donation.paymentMethod != PaymentMethod.WERO)
+		if (donation.paymentMethod != PaymentMethod.MOLLIE)
 		{
 			throw new PaymentMethodUnavailableException(donation.paymentMethod);
 		}

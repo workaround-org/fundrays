@@ -6,8 +6,8 @@ import de.fundrays.campaign.repository.CampaignRepository;
 import de.fundrays.donation.domain.Donation;
 import de.fundrays.donation.domain.DonationStatus;
 import de.fundrays.donation.repository.DonationRepository;
-import de.fundrays.payment.wero.WeroGateway;
-import de.fundrays.payment.wero.WeroPaymentInitiation;
+import de.fundrays.payment.mollie.MollieGateway;
+import de.fundrays.payment.mollie.PaymentInitiation;
 import io.quarkus.narayana.jta.QuarkusTransaction;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
@@ -35,7 +35,7 @@ class PublicDonationResourceTest
 	DonationRepository donationRepository;
 
 	@InjectMock
-	WeroGateway weroGateway;
+	MollieGateway mollieGateway;
 
 	@BeforeEach
 	void setup()
@@ -44,12 +44,10 @@ class PublicDonationResourceTest
 			donationRepository.deleteAll();
 			campaignRepository.deleteAll();
 		});
-		when(weroGateway.initiate(any(), any(), any()))
-			.thenReturn(new WeroPaymentInitiation(
-				"wero-tx-1",
-				"https://pay.wero.example/tx-1",
-				"wero://pay/tx-1",
-				"wero-qr-payload"));
+		when(mollieGateway.initiate(any(), any(), any()))
+			.thenReturn(new PaymentInitiation(
+				"tr_test1",
+				"https://checkout.mollie.com/pay/tr_test1"));
 	}
 
 	@Test
@@ -58,7 +56,7 @@ class PublicDonationResourceTest
 		// given
 		QuarkusTransaction.requiringNew().run(() -> campaignRepository.persist(aCampaign("active-campaign", CampaignStatus.ACTIVE)));
 		var body = """
-			{"amount":1500,"paymentMethod":"WERO"}
+			{"amount":1500,"paymentMethod":"MOLLIE"}
 			""";
 
 		// when
@@ -72,11 +70,9 @@ class PublicDonationResourceTest
 			.body("id", notNullValue())
 			.body("amount", equalTo(1500))
 			.body("status", equalTo("PENDING"))
-			.body("paymentUrl", equalTo("https://pay.wero.example/tx-1"))
-			.body("paymentDeepLink", equalTo("wero://pay/tx-1"))
-			.body("paymentQrPayload", equalTo("wero-qr-payload"));
+			.body("paymentUrl", equalTo("https://checkout.mollie.com/pay/tr_test1"));
 		QuarkusTransaction.requiringNew().run(() -> {
-			Donation saved = donationRepository.findByProviderRef("wero-tx-1").orElseThrow();
+			Donation saved = donationRepository.findByProviderRef("tr_test1").orElseThrow();
 			assertEquals(DonationStatus.PENDING, saved.status);
 		});
 	}
@@ -87,7 +83,7 @@ class PublicDonationResourceTest
 		// given — 499 cents is below the 500 cent minimum
 		QuarkusTransaction.requiringNew().run(() -> campaignRepository.persist(aCampaign("active-campaign", CampaignStatus.ACTIVE)));
 		var body = """
-			{"amount":499,"paymentMethod":"WERO"}
+			{"amount":499,"paymentMethod":"MOLLIE"}
 			""";
 
 		// when
@@ -105,7 +101,7 @@ class PublicDonationResourceTest
 	{
 		// given — no campaigns in DB
 		var body = """
-			{"amount":1000,"paymentMethod":"WERO"}
+			{"amount":1000,"paymentMethod":"MOLLIE"}
 			""";
 
 		// when
@@ -124,7 +120,7 @@ class PublicDonationResourceTest
 		// given
 		QuarkusTransaction.requiringNew().run(() -> campaignRepository.persist(aCampaign("paused-campaign", CampaignStatus.PAUSED)));
 		var body = """
-			{"amount":1000,"paymentMethod":"WERO"}
+			{"amount":1000,"paymentMethod":"MOLLIE"}
 			""";
 
 		// when
