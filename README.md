@@ -83,6 +83,50 @@ Mollie sends payment status updates to `POST /webhooks/mollie` as a form-encoded
 
 The resulting binary is at `target/*-runner`. The Docker image is built from `src/main/docker/Dockerfile.native`.
 
+## Deployment
+
+On every push to `main`, CI builds the native image and publishes it to the GitHub Container Registry as `ghcr.io/workaround-org/fundrays:latest` (release tags `fundrays-X.Y.Z` also produce `X`, `X.Y`, and `X.Y.Z` image tags).
+
+### Configuration via environment variables
+
+Any Quarkus property can be set with an environment variable using the standard
+[MicroProfile Config mapping](https://quarkus.io/guides/config-reference#environment-variables):
+uppercase the property name and replace every non-alphanumeric character with `_`.
+For example `quarkus.datasource.jdbc.url` → `QUARKUS_DATASOURCE_JDBC_URL`. This is how
+the database connection is provided in production (there is no datasource baked into
+`application.properties` — dev/test use Dev Services, prod is configured entirely via env).
+
+| Variable | Property | Description |
+|----------|----------|-------------|
+| `QUARKUS_DATASOURCE_JDBC_URL` | `quarkus.datasource.jdbc.url` | **Required.** e.g. `jdbc:postgresql://db:5432/fundrays` |
+| `QUARKUS_DATASOURCE_USERNAME` | `quarkus.datasource.username` | **Required.** Database user |
+| `QUARKUS_DATASOURCE_PASSWORD` | `quarkus.datasource.password` | **Required.** Database password |
+| `FUNDRAYS_ADMIN_USERNAME` | `fundrays.admin.username` | **Required.** Admin login created/updated on startup |
+| `FUNDRAYS_ADMIN_PASSWORD` | `fundrays.admin.password` | **Required.** Admin password (BCrypt-hashed at boot; change it here to reset) |
+| `FUNDRAYS_BASE_URL` | `fundrays.base-url` | Public base URL, must end with `/` (used for og:image and Mollie webhooks) |
+| `FUNDRAYS_MOLLIE_ENABLED` | `fundrays.mollie.enabled` | Set to `true` to enable payments |
+| `FUNDRAYS_MOLLIE_API_KEY` | `fundrays.mollie.api-key` | Mollie `live_...` key |
+
+On startup Flyway migrates the schema automatically (`db/migration`); the demo seed
+data is **dev-only** and is never loaded in production. The admin account is created
+from `FUNDRAYS_ADMIN_USERNAME`/`FUNDRAYS_ADMIN_PASSWORD` the first time the app boots
+against a fresh database — there are no default production credentials.
+
+### Example
+
+```bash
+docker run -p 8080:8080 \
+  -e QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://db:5432/fundrays \
+  -e QUARKUS_DATASOURCE_USERNAME=fundrays \
+  -e QUARKUS_DATASOURCE_PASSWORD=... \
+  -e FUNDRAYS_ADMIN_USERNAME=admin \
+  -e FUNDRAYS_ADMIN_PASSWORD=... \
+  -e FUNDRAYS_BASE_URL=https://fundrays.example.org/ \
+  -e FUNDRAYS_MOLLIE_ENABLED=true \
+  -e FUNDRAYS_MOLLIE_API_KEY=live_... \
+  ghcr.io/workaround-org/fundrays:latest
+```
+
 ## REST API
 
 **Public (unauthenticated)**
