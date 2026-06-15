@@ -1,4 +1,5 @@
--- Dev/test seed data
+-- Dev-only seed data (loaded via the db/seed Flyway location, dev profile only).
+-- Repeatable migration: dev runs with clean-at-start, so this re-applies on a fresh schema each start.
 
 -- Admin user: username=admin, password=admin123 (bcrypt cost 10)
 INSERT INTO AdminUser (id, username, passwordhash, roles, displayname, createdat)
