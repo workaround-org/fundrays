@@ -105,7 +105,8 @@ the database connection is provided in production (there is no datasource baked 
 | `FUNDRAYS_ADMIN_PASSWORD` | `fundrays.admin.password` | **Required.** Admin password (BCrypt-hashed at boot; change it here to reset) |
 | `FUNDRAYS_BASE_URL` | `fundrays.base-url` | Public base URL, must end with `/` (used for og:image and Mollie webhooks) |
 | `FUNDRAYS_MOLLIE_ENABLED` | `fundrays.mollie.enabled` | Set to `true` to enable payments |
-| `FUNDRAYS_MOLLIE_API_KEY` | `fundrays.mollie.api-key` | Mollie `live_...` key |
+| `FUNDRAYS_MOLLIE_API_KEY` | `fundrays.mollie.api-key` | Mollie `live_...` key (leading/trailing whitespace is trimmed) |
+| `FUNDRAYS_FORM_ENCRYPTION_KEY` | `quarkus.http.auth.form.encryption-key` | **Recommended in prod.** Stable secret (≥16 chars) for FORM auth sessions; without it admins are logged out on every restart and sessions break across instances |
 
 On startup Flyway migrates the schema automatically (`db/migration`); the demo seed
 data is **dev-only** and is never loaded in production. The admin account is created
@@ -124,6 +125,7 @@ docker run -p 8080:8080 \
   -e FUNDRAYS_BASE_URL=https://fundrays.example.org/ \
   -e FUNDRAYS_MOLLIE_ENABLED=true \
   -e FUNDRAYS_MOLLIE_API_KEY=live_... \
+  -e FUNDRAYS_FORM_ENCRYPTION_KEY=... \
   ghcr.io/workaround-org/fundrays:latest
 ```
 
