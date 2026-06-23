@@ -6,6 +6,9 @@
   <a href="https://github.com/workaround-org/fundrays/actions/workflows/native-image.yml">
     <img src="https://github.com/workaround-org/fundrays/actions/workflows/native-image.yml/badge.svg" alt="Native Image CI">
   </a>
+  <a href="https://github.com/workaround-org/fundrays/actions/workflows/jvm-image.yml">
+    <img src="https://github.com/workaround-org/fundrays/actions/workflows/jvm-image.yml/badge.svg" alt="JVM Image CI">
+  </a>
   <a href="https://github.com/workaround-org/fundrays/pkgs/container/fundrays">
     <img src="https://img.shields.io/badge/container-ghcr.io-ed2a91?logo=docker&logoColor=white" alt="Container">
   </a>
@@ -75,7 +78,18 @@ Payments are processed via [Mollie](https://mollie.com). Mollie's hosted checkou
 
 Mollie sends payment status updates to `POST /webhooks/mollie` as a form-encoded body containing the payment ID. The application then fetches the payment status from the Mollie API to confirm or fail the donation.
 
-## Building a native image
+## Building images
+
+### JVM image
+
+```bash
+./mvnw package
+docker build -f src/main/docker/Dockerfile.jvm -t fundrays:latest-jvm .
+```
+
+The JVM build is faster and requires no GraalVM. Use it for development deployments or when a quick turnaround matters more than startup time.
+
+### Native image
 
 ```bash
 ./mvnw package -Pnative -Dquarkus.native.container-build=true
@@ -85,7 +99,14 @@ The resulting binary is at `target/*-runner`. The Docker image is built from `sr
 
 ## Deployment
 
-On every push to `main`, CI builds the native image and publishes it to the GitHub Container Registry as `ghcr.io/workaround-org/fundrays:latest` (release tags `fundrays-X.Y.Z` also produce `X`, `X.Y`, and `X.Y.Z` image tags).
+CI builds two Docker images and publishes both to the GitHub Container Registry on every push to `main` and on release tags matching `fundrays-X.Y.Z`.
+
+| Image | Tag pattern | Build |
+|-------|-------------|-------|
+| Native (GraalVM) | `:latest`, `:X`, `:X.Y`, `:X.Y.Z` | `./mvnw package -Pnative`, `Dockerfile.native` |
+| JVM (Temurin 25) | `:latest-jvm`, `:X-jvm`, `:X.Y-jvm`, `:X.Y.Z-jvm` | `./mvnw package`, `Dockerfile.jvm` |
+
+The `-jvm` suffix keeps JVM image tags distinct from the native image tags so both can coexist in the same registry namespace.
 
 ### Configuration via environment variables
 
@@ -126,7 +147,7 @@ docker run -p 8080:8080 \
   -e FUNDRAYS_MOLLIE_ENABLED=true \
   -e FUNDRAYS_MOLLIE_API_KEY=live_... \
   -e FUNDRAYS_FORM_ENCRYPTION_KEY=... \
-  ghcr.io/workaround-org/fundrays:latest
+  ghcr.io/workaround-org/fundrays:latest        # native image; use :latest-jvm for the JVM build
 ```
 
 ## REST API
@@ -153,4 +174,4 @@ docker run -p 8080:8080 \
 
 ## CI / CD
 
-Every push to `main` builds a native image and pushes it to `ghcr.io` as `:latest`. Release tags matching `fundrays-X.Y.Z` additionally push versioned tags. Dependabot keeps Maven dependencies, Docker base images, and GitHub Actions up to date.
+Every push to `main` builds both the native image (`:latest`) and the JVM image (`:latest-jvm`) and pushes them to `ghcr.io`. Release tags matching `fundrays-X.Y.Z` additionally push versioned tags for both images. Dependabot keeps Maven dependencies, Docker base images, and GitHub Actions up to date.
