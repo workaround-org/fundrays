@@ -52,11 +52,18 @@ public class PublicDonationResource
 			// the request URI: behind a proxy / in docker the request host is
 			// localhost, and Mollie rejects a localhost redirect URL with HTTP
 			// 422.
+			//
+			// Normalize the base so the URLs are well-formed whether or not the
+			// configured value ends in a slash (FUNDRAYS_BASE_URL=https://x.de
+			// must not yield https://x.dedonate/...).
+			String base = baseUrl.endsWith("/")
+				? baseUrl.substring(0, baseUrl.length() - 1)
+				: baseUrl;
 			DonationSubmission submission = donationService.submit(
 				slug,
 				donation,
-				URI.create(baseUrl + "donate/" + slug + "/thanks"),
-				URI.create(baseUrl + "webhooks/mollie"));
+				URI.create(base + "/donate/" + slug + "/thanks"),
+				URI.create(base + "/webhooks/mollie"));
 			return toResponse(submission);
 		}
 		catch (CampaignNotFoundException e)
