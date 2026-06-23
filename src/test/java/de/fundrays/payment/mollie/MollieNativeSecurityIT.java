@@ -15,17 +15,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Native reproduction of the Mollie 400 "Invalid Authorization header" bug.
+ * Native reproduction of the Mollie reflection bugs (HTTP 400 "Invalid
+ * Authorization header" and later HTTP 422 from a malformed request body).
  *
- * The Mollie SDK assembles the {@code Authorization: Bearer <key>} header by
- * reflecting over {@code Security}'s declared fields and reading their
- * {@code @SpeakeasyMetadata} bearer-scheme annotation (see
- * {@code com.mollie.mollie.utils.Security#configureSecurity}). A native image
- * strips that reflective field+annotation access unless the classes are
- * registered ({@link MollieReflectionConfig}). Without the registration the SDK
- * emits a malformed Authorization header and Mollie answers HTTP 400, surfacing
- * at the donate endpoint as 502 Bad Gateway. With the registration the donation
- * is created and the endpoint returns 200 with a Mollie checkout URL.
+ * The Mollie SDK serializes the request and the {@code Authorization: Bearer
+ * <key>} header, and deserializes the response, entirely through Jackson and
+ * reflection over its model classes ({@code com.mollie.mollie.models.**}) and
+ * util (de)serializers ({@code com.mollie.mollie.utils.**}). A native image
+ * strips that reflective access unless the classes are registered, which is
+ * done for the whole SDK in
+ * {@code META-INF/native-image/com.mollie/mollie/reflect-config.json}. Without
+ * the registration the SDK emits a malformed request/header and Mollie rejects
+ * it (400/422), surfacing at the donate endpoint as 502 Bad Gateway. With the
+ * registration the donation is created and the endpoint returns 200 with a
+ * Mollie checkout URL.
  *
  * Runs only when a real Mollie test key AND a reachable datasource are provided
  * through the same env vars the deployment uses; otherwise it self-skips.

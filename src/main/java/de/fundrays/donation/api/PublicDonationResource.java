@@ -17,9 +17,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.net.URI;
@@ -38,8 +36,7 @@ public class PublicDonationResource
 	@POST
 	public DonateResponse donate(
 		@PathParam("slug") String slug,
-		@Valid PublicDonateRequest request,
-		@Context UriInfo uriInfo)
+		@Valid PublicDonateRequest request)
 	{
 		Donation donation = new Donation();
 		donation.amount = request.amount();
@@ -50,10 +47,15 @@ public class PublicDonationResource
 
 		try
 		{
+			// Build the redirect URL from the configured public base URL, not
+			// from
+			// the request URI: behind a proxy / in docker the request host is
+			// localhost, and Mollie rejects a localhost redirect URL with HTTP
+			// 422.
 			DonationSubmission submission = donationService.submit(
 				slug,
 				donation,
-				uriInfo.getBaseUriBuilder().path("donate").path(slug).path("thanks").build(),
+				URI.create(baseUrl + "donate/" + slug + "/thanks"),
 				URI.create(baseUrl + "webhooks/mollie"));
 			return toResponse(submission);
 		}
