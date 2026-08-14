@@ -6,12 +6,12 @@ updates:
     schedule:
       interval: weekly
     groups:
+      # GitHub-owned actions (checkout, setup-java, cache)
       github-core:
-        comment: "GitHub-owned actions (checkout, setup-java, cache)"
         patterns:
           - "actions/*"
+      # Docker-owned actions (buildx, login, metadata, build-push)
       docker-actions:
-        comment: "Docker-owned actions (buildx, login, metadata, build-push)"
         patterns:
           - "docker/*"
 
@@ -21,17 +21,17 @@ updates:
     schedule:
       interval: weekly
     groups:
+      # Quarkus platform BOM, extensions, and Quarkiverse add-ons
       quarkus:
-        comment: "Quarkus platform BOM, extensions, and Quarkiverse add-ons"
         patterns:
           - "io.quarkus:*"
           - "io.quarkiverse*:*"
+      # Test-scope libraries
       test:
-        comment: "Test-scope libraries"
         patterns:
           - "io.rest-assured:*"
+      # Maven build and code-quality plugins
       build-plugins:
-        comment: "Maven build and code-quality plugins"
         patterns:
           - "net.revelc.code.formatter:*"
           - "org.apache.maven.plugins:*"
