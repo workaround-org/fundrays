@@ -13,10 +13,9 @@
 #
 # docker run -i --rm -p 8080:8080 quarkus/fundrays
 #
-# The ` registry.access.redhat.com/ubi9/ubi-minimal:9.7` base image is based on UBI 9.
-# To use UBI 8, switch to `quay.io/ubi8/ubi-minimal:8.10`.
+# The `registry.access.redhat.com/ubi10/ubi-minimal:10.3` base image is based on UBI 10.
 ###
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.8
+FROM registry.access.redhat.com/ubi10/ubi-minimal:10.3
 WORKDIR /work/
 RUN microdnf install -y freetype fontconfig && microdnf clean all
 RUN chown 1001 /work \
